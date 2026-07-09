@@ -1,0 +1,2 @@
+C:\Users\eliel\Downloads\hvac-calc-pro-v5\HVACCalcProSetup\bin\Release\net8.0-windows\win-x64\publish\Instalador_HvacCalcPro_Oficial_Revit2025.pdb
+C:\Users\eliel\Downloads\hvac-calc-pro-v5\HVACCalcProSetup\bin\Release\net8.0-windows\win-x64\publish\Instalador_HvacCalcPro_Oficial_Revit2025.exe

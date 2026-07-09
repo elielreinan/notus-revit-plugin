@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Notus</Name>
+    <Assembly>%APPDATA%\Autodesk\Revit\Addins\2025\NotusRevitPlugin.dll</Assembly>
+    <AddInId>8D83E0A4-8D57-4C8D-B3F2-AC9D8E123456</AddInId>
+    <FullClassName>NotusRevitPlugin.App</FullClassName>
+    <VendorId>NORLAX</VendorId>
+    <VendorDescription>Notus | Calculo HVAC nativo no Revit 2025</VendorDescription>
+  </AddIn>
+</RevitAddIns>

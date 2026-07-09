@@ -1,0 +1,2 @@
+C:\Users\eliel\Documents\Notus-Revit-Plugin\NotusSetup\bin\Release\net8.0-windows\win-x64\publish\Instalador_Notus_Revit2025.pdb
+C:\Users\eliel\Documents\Notus-Revit-Plugin\NotusSetup\bin\Release\net8.0-windows\win-x64\publish\Instalador_Notus_Revit2025.exe
