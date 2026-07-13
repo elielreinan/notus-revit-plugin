@@ -106,7 +106,9 @@ namespace NotusRevitPlugin.Services
 
         public static bool IsManualEnvironment(Element element)
         {
-            return element != null && !string.IsNullOrWhiteSpace(GetText(element, "Notus_Manual_Name", "Notus_Manual_Area_m2"));
+            return element != null
+                && !GetText(element, "Notus_ResultCarrier").Equals("Sim", StringComparison.OrdinalIgnoreCase)
+                && !string.IsNullOrWhiteSpace(GetText(element, "Notus_Manual_Name", "Notus_Manual_Area_m2"));
         }
 
         private static Solid CreateSolid(ManualEnvironmentData data, XYZ center)

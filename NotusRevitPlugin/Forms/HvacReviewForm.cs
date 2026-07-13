@@ -89,7 +89,7 @@ namespace NotusRevitPlugin.Forms
             root.Controls.Add(grid, 0, 1);
 
             FlowLayoutPanel buttons = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft };
-            Button save = new Button { Text = "Gravar editaveis", Width = 140, Height = 34 };
+            Button save = new Button { Text = "Gravar e gerar tabela", Width = 170, Height = 34 };
             Button cancel = new Button { Text = "Cancelar", Width = 100, Height = 34 };
             save.Click += (s, e) => { Confirmed = true; DialogResult = DialogResult.OK; Close(); };
             cancel.Click += (s, e) => { Confirmed = false; DialogResult = DialogResult.Cancel; Close(); };

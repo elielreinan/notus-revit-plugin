@@ -35,7 +35,7 @@ namespace NotusRevitPlugin
                 }
                 else if (ifc.LinkedRooms + ifc.LinkedSpaces > 0)
                 {
-                    status += "\n\nAmbientes em vinculos foram detectados. Eles entram na leitura/calculo, mas resultados so sao gravados em elementos editaveis do modelo ativo.";
+                    status += "\n\nAmbientes em vinculos foram detectados. Eles entram na leitura/calculo; quando forem somente leitura, o Notus cria linhas de tabela/grafico no modelo ativo.";
                 }
 
                 TaskDialog dialog = new TaskDialog(ProductInfo.FullName)

@@ -28,8 +28,9 @@ namespace NotusRevitPlugin.Services
             List<string> pages = new List<string>();
             pages.Add(BuildCoverPage(doc, elements.Count, totalBtu, totalTr, totalSupply, totalExternal, alertCount));
             pages.Add(BuildSummaryPage(doc, elements, totalBtu, totalTr, totalSupply, totalExternal));
+            pages.Add(BuildChartPage(elements));
             pages.AddRange(BuildEnvironmentPages(elements));
-            if (pages.Count == 2) pages.Add(BuildEmptyEnvironmentPage());
+            if (elements.Count == 0) pages.Add(BuildEmptyEnvironmentPage());
 
             WritePdf(outputPath, pages);
             return outputPath;
@@ -79,13 +80,70 @@ namespace NotusRevitPlugin.Services
             c.Text("- Ambientes de vinculos podem ser calculados para revisao, mas os parametros sao gravados apenas no modelo ativo.", 58, y, 10, false, 96); y -= 28;
             c.Text("- IFC exportado sem IfcSpace exige reexportacao com ambientes ou criacao/revisao de Ambientes Notus manuais.", 58, y, 10, false, 96); y -= 34;
 
-            c.Text("Top ambientes por TR", 48, y, 15, true); y -= 24;
+            c.Text("Tabela tecnica resumida - top ambientes por TR", 48, y, 15, true); y -= 24;
             AddTableHeader(c, y); y -= 18;
             foreach (Element e in elements.Take(10))
             {
                 AddEnvironmentRow(c, e, y);
                 y -= 18;
             }
+            return c.ToString();
+        }
+
+        private string BuildChartPage(List<Element> elements)
+        {
+            PdfContent c = NewPage("Grafico de carga termica");
+            if (elements.Count == 0)
+            {
+                c.Text("Nenhum ambiente calculado encontrado para gerar grafico.", 48, 720, 12, false);
+                return c.ToString();
+            }
+
+            List<Element> chartElements = elements
+                .OrderByDescending(e => ParseDouble(GetParameterText(e, "Notus_TR")))
+                .Take(20)
+                .ToList();
+
+            double maxTr = chartElements.Max(e => ParseDouble(GetParameterText(e, "Notus_TR")));
+            if (maxTr <= 0) maxTr = 1;
+
+            double originX = 62;
+            double baseY = 170;
+            double chartWidth = 470;
+            double chartHeight = 395;
+            double gap = chartElements.Count > 14 ? 5 : 8;
+            double barWidth = Math.Max(10, (chartWidth - gap * (chartElements.Count - 1)) / chartElements.Count);
+
+            c.Text("Carga termica por ambiente (TR)", 48, 724, 16, true);
+            c.Text("Top " + chartElements.Count + " ambientes ordenados por maior TR", 48, 700, 10, false);
+            c.Text("Maior carga: " + Format(maxTr, 2) + " TR", 390, 700, 10, false);
+
+            c.Line(originX, baseY, originX + chartWidth + 10, baseY, 0.8);
+            c.Line(originX, baseY, originX, baseY + chartHeight + 10, 0.8);
+
+            for (int tick = 1; tick <= 4; tick++)
+            {
+                double y = baseY + chartHeight * tick / 4.0;
+                c.Line(originX - 4, y, originX + chartWidth + 4, y, 0.2);
+                c.Text(Format(maxTr * tick / 4.0, 1), 30, y - 3, 7, false);
+            }
+
+            for (int i = 0; i < chartElements.Count; i++)
+            {
+                Element e = chartElements[i];
+                double tr = ParseDouble(GetParameterText(e, "Notus_TR"));
+                double barHeight = Math.Max(4, chartHeight * tr / maxTr);
+                double x = originX + 8 + i * (barWidth + gap);
+
+                c.FilledBox(x, baseY, barWidth, barHeight, 0.62);
+                c.Box(x, baseY, barWidth, barHeight);
+                c.Text(Format(tr, 2), x - 2, baseY + barHeight + 8, 7, false);
+                c.Text(Short(GetEnvironmentNumberOrName(e), 8), x - 2, baseY - 16, 6.8, false);
+            }
+
+            c.Text("Ambientes", originX + chartWidth - 20, baseY - 36, 9, false);
+            c.Text("TR", originX - 28, baseY + chartHeight + 16, 9, false);
+            c.Text("Observacao: grafico para pre-dimensionamento. Validar criterios e fatores com o responsavel tecnico.", 48, 90, 9, false, 100);
             return c.ToString();
         }
 
@@ -130,25 +188,33 @@ namespace NotusRevitPlugin.Services
         private void AddTableHeader(PdfContent c, double y)
         {
             c.Line(48, y + 13, 547, y + 13, 0.4);
-            c.Text("Pavimento", 50, y, 8.5, true);
-            c.Text("Ambiente", 125, y, 8.5, true);
-            c.Text("BTU/h", 325, y, 8.5, true);
-            c.Text("TR", 388, y, 8.5, true);
-            c.Text("SHR", 428, y, 8.5, true);
-            c.Text("Alertas", 470, y, 8.5, true);
+            c.Text("Pav.", 50, y, 7.6, true);
+            c.Text("Ambiente", 88, y, 7.6, true);
+            c.Text("TR", 226, y, 7.6, true);
+            c.Text("Sens.", 256, y, 7.6, true);
+            c.Text("SHR", 292, y, 7.6, true);
+            c.Text("m2/TR", 322, y, 7.6, true);
+            c.Text("Insuf.", 362, y, 7.6, true);
+            c.Text("Ext.", 410, y, 7.6, true);
+            c.Text("ACH", 452, y, 7.6, true);
+            c.Text("Area", 486, y, 7.6, true);
+            c.Text("Pes.", 522, y, 7.6, true);
             c.Line(48, y - 4, 547, y - 4, 0.4);
         }
 
         private void AddEnvironmentRow(PdfContent c, Element e, double y)
         {
-            string alerts = GetParameterText(e, "Notus_ValidationAlerts");
-            if (alerts.Equals("Sem alertas", StringComparison.OrdinalIgnoreCase)) alerts = "";
-            c.Text(Short(GetLevelName(e), 14), 50, y, 8.3, false);
-            c.Text(Short(GetEnvironmentName(e), 36), 125, y, 8.3, false);
-            c.Text(Short(GetParameterText(e, "Notus_Total_BTU"), 11), 325, y, 8.3, false);
-            c.Text(Short(GetParameterText(e, "Notus_TR"), 8), 388, y, 8.3, false);
-            c.Text(Short(GetParameterText(e, "Notus_SHR"), 6), 428, y, 8.3, false);
-            c.Text(Short(alerts, 22), 470, y, 8.0, false);
+            c.Text(Short(GetLevelName(e), 7), 50, y, 7.4, false);
+            c.Text(Short(GetEnvironmentName(e), 25), 88, y, 7.4, false);
+            c.Text(Short(GetParameterText(e, "Notus_TR"), 7), 226, y, 7.4, false);
+            c.Text(Short(GetParameterText(e, "Notus_Sensible_TR"), 7), 256, y, 7.4, false);
+            c.Text(Short(GetParameterText(e, "Notus_SHR"), 5), 292, y, 7.4, false);
+            c.Text(Short(GetParameterText(e, "Notus_m2_per_TR"), 7), 322, y, 7.4, false);
+            c.Text(Short(GetParameterText(e, "Notus_Supply_m3h"), 8), 362, y, 7.4, false);
+            c.Text(Short(GetParameterText(e, "Notus_External_m3h"), 8), 410, y, 7.4, false);
+            c.Text(Short(GetParameterText(e, "Notus_AirChanges_h"), 6), 452, y, 7.4, false);
+            c.Text(Short(GetParameterText(e, "Notus_Area_m2", "Notus_Manual_Area_m2"), 6), 486, y, 7.4, false);
+            c.Text(Short(GetParameterText(e, "Notus_Occupants", "Notus_Manual_Occupants"), 4), 522, y, 7.4, false);
         }
 
         private void WritePdf(string path, List<string> pageStreams)
@@ -222,16 +288,25 @@ namespace NotusRevitPlugin.Services
 
         private string GetEnvironmentName(Element e)
         {
-            string value = GetParameterText(e, "Number", "Numero", "Número");
-            string name = GetParameterText(e, "Notus_Manual_Name", "Name", "Nome");
+            string value = GetParameterText(e, "Notus_Room_Number", "Number", "Numero", "Número");
+            string name = GetParameterText(e, "Notus_Room_Name", "Notus_Manual_Name", "Name", "Nome");
             if (!string.IsNullOrWhiteSpace(value) && !string.IsNullOrWhiteSpace(name)) return value + " - " + name;
             return string.IsNullOrWhiteSpace(name) ? Safe(e.Name) : name;
+        }
+
+        private string GetEnvironmentNumberOrName(Element e)
+        {
+            string value = GetParameterText(e, "Notus_Room_Number", "Number", "Numero", "Número");
+            if (!string.IsNullOrWhiteSpace(value)) return value;
+            return GetEnvironmentName(e);
         }
 
         private string GetLevelName(Element e)
         {
             try
             {
+                string unified = GetParameterText(e, "Notus_Level");
+                if (!string.IsNullOrWhiteSpace(unified)) return unified;
                 string manual = GetParameterText(e, "Notus_Manual_Level");
                 if (!string.IsNullOrWhiteSpace(manual)) return manual;
                 Element level = e.Document.GetElement(e.LevelId);
@@ -330,6 +405,16 @@ namespace NotusRevitPlugin.Services
                     .Append(y.ToString("0.##", CultureInfo.InvariantCulture)).Append(' ')
                     .Append(width.ToString("0.##", CultureInfo.InvariantCulture)).Append(' ')
                     .Append(height.ToString("0.##", CultureInfo.InvariantCulture)).AppendLine(" re S");
+            }
+
+            public void FilledBox(double x, double y, double width, double height, double gray)
+            {
+                double g = Math.Max(0, Math.Min(1, gray));
+                _sb.Append(g.ToString("0.##", CultureInfo.InvariantCulture)).Append(" g ")
+                    .Append(x.ToString("0.##", CultureInfo.InvariantCulture)).Append(' ')
+                    .Append(y.ToString("0.##", CultureInfo.InvariantCulture)).Append(' ')
+                    .Append(width.ToString("0.##", CultureInfo.InvariantCulture)).Append(' ')
+                    .Append(height.ToString("0.##", CultureInfo.InvariantCulture)).AppendLine(" re f 0 g");
             }
 
             public override string ToString()

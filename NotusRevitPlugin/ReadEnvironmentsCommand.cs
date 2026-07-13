@@ -33,7 +33,7 @@ namespace NotusRevitPlugin
                     "Links nao acessiveis: " + ifc.UnreadableLinks + "\n" +
                     "Elementos com IFC GUID: " + ifc.ElementsWithIfcGuid + "\n\n" +
                     ifc.Conclusion + "\n\n" +
-                    "Observacao: ambientes lidos de vinculos podem ser calculados, mas os parametros Notus so sao gravados nos ambientes editaveis do modelo ativo.");
+                    "Observacao: ambientes lidos de vinculos podem ser calculados. Quando o vinculo e somente leitura, o Notus cria linhas de tabela/grafico no modelo ativo para documentar o resultado.");
                 return Result.Succeeded;
             }
             catch (Exception ex)

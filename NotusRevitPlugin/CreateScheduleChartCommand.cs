@@ -20,6 +20,7 @@ namespace NotusRevitPlugin
                 using (Transaction transaction = new Transaction(doc, "Gerar tabela técnica Notus"))
                 {
                     transaction.Start();
+                    HvacParameterService.EnsureParameters(doc, commandData.Application.Application);
                     resultMessage = new HvacScheduleService().CreateTechnicalSchedulesAndChart(doc);
                     transaction.Commit();
                 }
