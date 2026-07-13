@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\eliel\\Documents\\Notus-Revit-Plugin\\NotusRevitPlugin\\NotusRevitPlugin.csproj",
+      "projectUniqueName": "C:\\Repo\\Notus-Revit-Plugin\\NotusRevitPlugin\\NotusRevitPlugin.csproj",
       "projectName": "NotusRevitPlugin",
-      "projectPath": "C:\\Users\\eliel\\Documents\\Notus-Revit-Plugin\\NotusRevitPlugin\\NotusRevitPlugin.csproj",
+      "projectPath": "C:\\Repo\\Notus-Revit-Plugin\\NotusRevitPlugin\\NotusRevitPlugin.csproj",
       "packagesPath": "C:\\Users\\eliel\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\eliel\\Documents\\Notus-Revit-Plugin\\NotusRevitPlugin\\obj\\",
+      "outputPath": "C:\\Repo\\Notus-Revit-Plugin\\NotusRevitPlugin\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\eliel\\AppData\\Roaming\\NuGet\\NuGet.Config"

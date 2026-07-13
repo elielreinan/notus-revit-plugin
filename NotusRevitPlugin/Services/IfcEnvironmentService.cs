@@ -129,6 +129,7 @@ namespace NotusRevitPlugin.Services
             foreach (Element element in elements)
             {
                 if (element == null || element.Category == null) continue;
+                if (IsNotusResultCarrier(element)) continue;
                 if (IsIfcRelated(element) || IsArchitecturalFallback(element)) result.Add(element);
             }
             return result;
@@ -288,6 +289,27 @@ namespace NotusRevitPlugin.Services
                 return ArchitecturalCategories.Any(c => id == (long)c);
             }
             catch { return false; }
+        }
+
+        private bool IsNotusResultCarrier(Element element)
+        {
+            DirectShape shape = element as DirectShape;
+            if (shape != null)
+            {
+                try
+                {
+                    if (string.Equals(shape.ApplicationId, "Notus", StringComparison.OrdinalIgnoreCase)
+                        && !string.IsNullOrWhiteSpace(shape.ApplicationDataId)
+                        && shape.ApplicationDataId.StartsWith("NotusReadOnlyResult_", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+                catch { }
+            }
+
+            string marker = GetParameterText(element, "Notus_ResultCarrier");
+            return marker.Equals("Sim", StringComparison.OrdinalIgnoreCase) || marker.Equals("Yes", StringComparison.OrdinalIgnoreCase);
         }
 
         private string BuildText(Element element)

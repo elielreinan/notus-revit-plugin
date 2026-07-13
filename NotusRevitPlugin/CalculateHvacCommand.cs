@@ -111,8 +111,10 @@ namespace NotusRevitPlugin
 
                 List<HvacCalculationPreview> validPreviews = previews.Where(p => p.Input != null && p.Input.AreaM2 > 0 && p.Input.VolumeM3 > 0).ToList();
                 List<HvacCalculationPreview> writablePreviews = validPreviews.Where(p => p.CanWrite).ToList();
+                List<HvacCalculationPreview> readOnlyPreviews = validPreviews.Where(p => !p.CanWrite).ToList();
 
                 int calculated = 0;
+                int reportRows = 0;
                 int readOnlyCalculated = validPreviews.Count - writablePreviews.Count;
                 int ifcCalculated = validPreviews.Count(p => p.Input.IsIfcFallback);
                 double totalBTUh = validPreviews.Sum(p => p.Result.TotalBTUh);
@@ -122,7 +124,7 @@ namespace NotusRevitPlugin
                 string lastClimate = validPreviews.Count > 0 ? validPreviews[validPreviews.Count - 1].Result.ClimateSummary : "";
                 int warningCount = validPreviews.Sum(p => p.Alerts.Count);
 
-                if (writablePreviews.Count > 0)
+                if (validPreviews.Count > 0)
                 {
                     using (Transaction transaction = new Transaction(doc, "Calcular Notus"))
                     {
@@ -131,16 +133,17 @@ namespace NotusRevitPlugin
 
                         foreach (HvacCalculationPreview preview in writablePreviews)
                         {
-                            WriteResultToElement(preview.Element, preview.Result, preview.Alerts);
+                            HvacResultElementService.WriteResultData(preview.Element, preview.Input, preview.Result, preview.Alerts);
                             calculated++;
                         }
 
+                        reportRows = HvacResultElementService.ReplaceReadOnlyResultElements(doc, readOnlyPreviews);
                         transaction.Commit();
                     }
                 }
 
                 string scheduleMessage = "";
-                if (calculated > 0)
+                if (calculated + reportRows > 0)
                 {
                     try
                     {
@@ -164,10 +167,11 @@ namespace NotusRevitPlugin
 
                 TaskDialog dialog = new TaskDialog("Notus")
                 {
-                    MainInstruction = calculated > 0 ? "Calculo HVAC gravado no Revit." : "Calculo HVAC concluido para ambientes somente leitura.",
+                    MainInstruction = calculated + reportRows > 0 ? "Calculo HVAC registrado no Revit." : "Calculo HVAC concluido para ambientes somente leitura.",
                     MainContent =
                         "Ambientes calculados na previa: " + validPreviews.Count +
-                        "\nAmbientes gravados no modelo ativo: " + calculated +
+                        "\nAmbientes editaveis atualizados: " + calculated +
+                        (reportRows > 0 ? "\nLinhas de tabela para vinculos/IFC: " + reportRows : "") +
                         (readOnlyCalculated > 0 ? "\nAmbientes somente leitura/vinculados: " + readOnlyCalculated : "") +
                         "\nIgnorados sem area/volume: " + skipped +
                         (ifcCalculated > 0 ? "\nAmbientes IFC/manuais estimados: " + ifcCalculated : "") +
@@ -183,7 +187,7 @@ namespace NotusRevitPlugin
                     CommonButtons = TaskDialogCommonButtons.Ok
                 };
                 dialog.Show();
-                HvacLogService.Info("Calculo concluido. Calculados=" + validPreviews.Count + ", Gravados=" + calculated + ", SomenteLeitura=" + readOnlyCalculated + ", BTU=" + totalBTUh + ", TR=" + totalTR);
+                HvacLogService.Info("Calculo concluido. Calculados=" + validPreviews.Count + ", Gravados=" + calculated + ", LinhasTabela=" + reportRows + ", SomenteLeitura=" + readOnlyCalculated + ", BTU=" + totalBTUh + ", TR=" + totalTR);
                 return Result.Succeeded;
             }
             catch (Exception ex)
@@ -217,41 +221,5 @@ namespace NotusRevitPlugin
             catch { return false; }
         }
 
-        private void WriteResultToElement(Element element, HvacResult result, IList<string> alerts)
-        {
-            SetParameter(element, "Notus_Total_BTU", HvacCalculationService.FormatNumber(result.TotalBTUh, 0));
-            SetParameter(element, "Notus_TR", HvacCalculationService.FormatNumber(result.TotalTR, 2));
-            SetParameter(element, "Notus_Sensible_BTU", HvacCalculationService.FormatNumber(result.SensibleBTUh, 0));
-            SetParameter(element, "Notus_Sensible_TR", HvacCalculationService.FormatNumber(result.SensibleTR, 2));
-            SetParameter(element, "Notus_Latent_BTU", HvacCalculationService.FormatNumber(result.LatentBTUh, 0));
-            SetParameter(element, "Notus_SHR", HvacCalculationService.FormatNumber(result.SHR, 2));
-            SetParameter(element, "Notus_Supply_m3h", HvacCalculationService.FormatNumber(result.SupplyAirflowM3h, 0));
-            SetParameter(element, "Notus_External_m3h", HvacCalculationService.FormatNumber(result.ExternalAirflowM3h, 0));
-            SetParameter(element, "Notus_AirChanges_h", HvacCalculationService.FormatNumber(result.AirChangesHour, 2));
-            SetParameter(element, "Notus_Equipment", result.EquipmentSelected);
-            SetParameter(element, "Notus_Method", result.Method);
-            SetParameter(element, "Notus_Climate", result.ClimateSummary);
-            SetParameter(element, "Notus_InternalExternal", result.InternalExternalSummary);
-            SetParameter(element, "Notus_NormRef", result.NormativeReference);
-            SetParameter(element, "Notus_People_BTU", HvacCalculationService.FormatNumber(result.PeopleSensibleBTUh + result.PeopleLatentBTUh, 0));
-            SetParameter(element, "Notus_Lighting_BTU", HvacCalculationService.FormatNumber(result.LightingBTUh, 0));
-            SetParameter(element, "Notus_Equipment_BTU", HvacCalculationService.FormatNumber(result.EquipmentBTUh, 0));
-            SetParameter(element, "Notus_Envelope_BTU", HvacCalculationService.FormatNumber(result.EnvelopeBTUh, 0));
-            SetParameter(element, "Notus_Solar_BTU", HvacCalculationService.FormatNumber(result.SolarBTUh, 0));
-            SetParameter(element, "Notus_WallRoof_BTU", HvacCalculationService.FormatNumber(result.WallRoofBTUh, 0));
-            SetParameter(element, "Notus_Infiltration_BTU", HvacCalculationService.FormatNumber(result.InfiltrationBTUh, 0));
-            SetParameter(element, "Notus_Ventilation_BTU", HvacCalculationService.FormatNumber(result.VentilationSensibleBTUh + result.VentilationLatentBTUh, 0));
-            SetParameter(element, "Notus_Memorial", result.MemorialSummary);
-            SetParameter(element, "Notus_Notes", result.Notes);
-            SetParameter(element, "Notus_ValidationAlerts", alerts == null || alerts.Count == 0 ? "Sem alertas" : string.Join("; ", alerts));
-            SetParameter(element, "Notus_CriteriaProfile", "Perfil tecnico baseado em criterios editaveis");
-        }
-
-        private void SetParameter(Element element, string name, string value)
-        {
-            Parameter parameter = element.LookupParameter(name);
-            if (parameter == null || parameter.IsReadOnly) return;
-            parameter.Set(value ?? "");
-        }
     }
 }

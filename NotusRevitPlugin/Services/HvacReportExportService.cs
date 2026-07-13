@@ -14,7 +14,7 @@ namespace NotusRevitPlugin.Services
     {
         private readonly string[] _columns = new string[]
         {
-            "ElementId", "Número", "Nome", "Categoria", "Pavimento", "BTU/h", "TR", "SHR", "Vazão insuflada m³/h", "Vazão externa m³/h", "ACH", "Método", "Clima", "Memorial", "Observações", "Alertas"
+            "ElementId", "Número", "Nome", "Categoria", "Pavimento", "Área m²", "Pessoas", "BTU/h", "TR", "TR sensível", "SHR", "m²/TR", "Vazão insuflada m³/h", "Vazão externa m³/h", "ACH", "Origem", "Método", "Clima", "Memorial", "Observações", "Alertas"
         };
 
         public List<Element> GetCalculatedElements(Document doc)
@@ -216,16 +216,21 @@ namespace NotusRevitPlugin.Services
             return new string[]
             {
                 e.Id.Value.ToString(CultureInfo.InvariantCulture),
-                GetParameterText(e, "Number", "Número"),
-                GetParameterText(e, "Notus_Manual_Name", "Name", "Nome"),
+                GetParameterText(e, "Notus_Room_Number", "Number", "Número"),
+                GetParameterText(e, "Notus_Room_Name", "Notus_Manual_Name", "Name", "Nome"),
                 e.Category != null ? e.Category.Name : "",
                 GetLevelName(e),
+                GetParameterText(e, "Notus_Area_m2", "Notus_Manual_Area_m2"),
+                GetParameterText(e, "Notus_Occupants", "Notus_Manual_Occupants"),
                 GetParameterText(e, "Notus_Total_BTU"),
                 GetParameterText(e, "Notus_TR"),
+                GetParameterText(e, "Notus_Sensible_TR"),
                 GetParameterText(e, "Notus_SHR"),
+                GetParameterText(e, "Notus_m2_per_TR"),
                 GetParameterText(e, "Notus_Supply_m3h"),
                 GetParameterText(e, "Notus_External_m3h"),
                 GetParameterText(e, "Notus_AirChanges_h"),
+                GetParameterText(e, "Notus_Source"),
                 GetParameterText(e, "Notus_Method"),
                 GetParameterText(e, "Notus_Climate"),
                 GetParameterText(e, "Notus_Memorial"),
@@ -362,6 +367,8 @@ namespace NotusRevitPlugin.Services
             {
                 string manual = GetParameterText(e, "Notus_Manual_Level");
                 if (!string.IsNullOrWhiteSpace(manual)) return manual;
+                string unified = GetParameterText(e, "Notus_Level");
+                if (!string.IsNullOrWhiteSpace(unified)) return unified;
                 Element level = e.Document.GetElement(e.LevelId);
                 return level != null ? level.Name : "Sem pavimento";
             }

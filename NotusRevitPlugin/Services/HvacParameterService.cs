@@ -54,7 +54,16 @@ namespace NotusRevitPlugin.Services
             P("1f6d8f3e-1a17-4a13-9bb5-7dd770001041", "Notus_Manual_Observation", "Observação técnica do ambiente manual"),
             P("1f6d8f3e-1a17-4a13-9bb5-7dd770001042", "Notus_Manual_SourceCategory", "Categoria do elemento IFC/origem"),
             P("1f6d8f3e-1a17-4a13-9bb5-7dd770001043", "Notus_ValidationAlerts", "Alertas técnicos antes da gravação"),
-            P("1f6d8f3e-1a17-4a13-9bb5-7dd770001044", "Notus_CriteriaProfile", "Perfil técnico baseado em critérios editáveis")
+            P("1f6d8f3e-1a17-4a13-9bb5-7dd770001044", "Notus_CriteriaProfile", "Perfil técnico baseado em critérios editáveis"),
+            P("1f6d8f3e-1a17-4a13-9bb5-7dd770001045", "Notus_Room_Number", "Número unificado do ambiente Notus"),
+            P("1f6d8f3e-1a17-4a13-9bb5-7dd770001046", "Notus_Room_Name", "Nome unificado do ambiente Notus"),
+            P("1f6d8f3e-1a17-4a13-9bb5-7dd770001047", "Notus_Level", "Pavimento unificado do ambiente Notus"),
+            P("1f6d8f3e-1a17-4a13-9bb5-7dd770001048", "Notus_Area_m2", "Área m2 usada no cálculo Notus"),
+            P("1f6d8f3e-1a17-4a13-9bb5-7dd770001049", "Notus_Volume_m3", "Volume m3 usado no cálculo Notus"),
+            P("1f6d8f3e-1a17-4a13-9bb5-7dd770001050", "Notus_Occupants", "Número de pessoas usado no cálculo Notus"),
+            P("1f6d8f3e-1a17-4a13-9bb5-7dd770001051", "Notus_m2_per_TR", "Relação m2 por TR Notus"),
+            P("1f6d8f3e-1a17-4a13-9bb5-7dd770001052", "Notus_Source", "Origem do ambiente calculado Notus"),
+            P("1f6d8f3e-1a17-4a13-9bb5-7dd770001053", "Notus_ResultCarrier", "Linha automática de resultado Notus para vínculo/IFC")
         };
 
         public static readonly string[] ResultParameterNames = Array.ConvertAll(Specs, s => s.Name);

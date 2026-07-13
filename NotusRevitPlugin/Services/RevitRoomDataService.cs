@@ -68,8 +68,8 @@ namespace NotusRevitPlugin.Services
             bool isLinkedElement = hostDoc != null && elementDoc != null && !object.ReferenceEquals(elementDoc, hostDoc);
             string sourceDocumentTitle = GetDocumentTitle(elementDoc);
 
-            string number = GetParameterText(element, "Notus_Manual_SourceElementId", "Number", "Numero", "Número", "IfcName", "Tag");
-            string name = GetParameterText(element, "Notus_Manual_Name", "Name", "Nome", "LongName", "Long Name", "IfcLongName");
+            string number = GetParameterText(element, "Notus_Room_Number", "Number", "Numero", "Número", "Notus_Manual_SourceElementId", "IfcName", "Tag");
+            string name = GetParameterText(element, "Notus_Room_Name", "Notus_Manual_Name", "Name", "Nome", "LongName", "Long Name", "IfcLongName");
 
             Room room = element as Room;
             if (room != null)
@@ -147,6 +147,7 @@ namespace NotusRevitPlugin.Services
         public bool IsSupportedEnvironmentElement(Element element)
         {
             if (element == null) return false;
+            if (IsNotusResultCarrier(element)) return false;
             if (IsRoomOrSpace(element)) return true;
             if (!string.IsNullOrWhiteSpace(GetParameterText(element, "Notus_Manual_Name", "Notus_Manual_Area_m2"))) return true;
             return _ifcService.LooksLikeIfcSpace(element);
@@ -164,13 +165,13 @@ namespace NotusRevitPlugin.Services
                 result.AddRange(new FilteredElementCollector(sourceDoc)
                     .OfCategory(BuiltInCategory.OST_GenericModel)
                     .WhereElementIsNotElementType()
-                    .Where(e => !string.IsNullOrWhiteSpace(GetParameterText(e, "Notus_Manual_Name", "Notus_Manual_Area_m2")) && HasUsableArea(e)));
+                    .Where(e => !IsNotusResultCarrier(e) && !string.IsNullOrWhiteSpace(GetParameterText(e, "Notus_Manual_Name", "Notus_Manual_Area_m2")) && HasUsableArea(e)));
             }
             catch { }
 
             try
             {
-                result.AddRange(_ifcService.GetIfcSpaceLikeElements(sourceDoc).Where(HasUsableArea));
+                result.AddRange(_ifcService.GetIfcSpaceLikeElements(sourceDoc).Where(e => !IsNotusResultCarrier(e) && HasUsableArea(e)));
             }
             catch { }
         }
@@ -192,6 +193,28 @@ namespace NotusRevitPlugin.Services
             if (element == null) return false;
             if (GetAreaM2(element) > 0) return true;
             return _ifcService.LooksLikeIfcSpace(element) && _ifcService.EstimateAreaM2FromBoundingBox(element) > 0;
+        }
+
+        private bool IsNotusResultCarrier(Element element)
+        {
+            if (element == null) return false;
+
+            string marker = GetParameterText(element, "Notus_ResultCarrier");
+            if (marker.Equals("Sim", StringComparison.OrdinalIgnoreCase) || marker.Equals("Yes", StringComparison.OrdinalIgnoreCase)) return true;
+
+            DirectShape shape = element as DirectShape;
+            if (shape == null) return false;
+
+            try
+            {
+                return string.Equals(shape.ApplicationId, "Notus", StringComparison.OrdinalIgnoreCase)
+                    && !string.IsNullOrWhiteSpace(shape.ApplicationDataId)
+                    && shape.ApplicationDataId.StartsWith("NotusReadOnlyResult_", StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private List<Element> DistinctElements(IEnumerable<Element> elements)

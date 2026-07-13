@@ -44,3 +44,12 @@ PARAM	1f6d8f3e-1a17-4a13-9bb5-7dd770001041	Notus_Manual_Observation	TEXT		1	1	Ob
 PARAM	1f6d8f3e-1a17-4a13-9bb5-7dd770001042	Notus_Manual_SourceCategory	TEXT		1	1	Categoria do elemento IFC/origem	1	0
 PARAM	1f6d8f3e-1a17-4a13-9bb5-7dd770001043	Notus_ValidationAlerts	TEXT		1	1	Alertas técnicos antes da gravação	1	0
 PARAM	1f6d8f3e-1a17-4a13-9bb5-7dd770001044	Notus_CriteriaProfile	TEXT		1	1	Perfil técnico baseado em critérios editáveis	1	0
+PARAM	1f6d8f3e-1a17-4a13-9bb5-7dd770001045	Notus_Room_Number	TEXT		1	1	Número unificado do ambiente Notus	1	0
+PARAM	1f6d8f3e-1a17-4a13-9bb5-7dd770001046	Notus_Room_Name	TEXT		1	1	Nome unificado do ambiente Notus	1	0
+PARAM	1f6d8f3e-1a17-4a13-9bb5-7dd770001047	Notus_Level	TEXT		1	1	Pavimento unificado do ambiente Notus	1	0
+PARAM	1f6d8f3e-1a17-4a13-9bb5-7dd770001048	Notus_Area_m2	TEXT		1	1	Área m2 usada no cálculo Notus	1	0
+PARAM	1f6d8f3e-1a17-4a13-9bb5-7dd770001049	Notus_Volume_m3	TEXT		1	1	Volume m3 usado no cálculo Notus	1	0
+PARAM	1f6d8f3e-1a17-4a13-9bb5-7dd770001050	Notus_Occupants	TEXT		1	1	Número de pessoas usado no cálculo Notus	1	0
+PARAM	1f6d8f3e-1a17-4a13-9bb5-7dd770001051	Notus_m2_per_TR	TEXT		1	1	Relação m2 por TR Notus	1	0
+PARAM	1f6d8f3e-1a17-4a13-9bb5-7dd770001052	Notus_Source	TEXT		1	1	Origem do ambiente calculado Notus	1	0
+PARAM	1f6d8f3e-1a17-4a13-9bb5-7dd770001053	Notus_ResultCarrier	TEXT		1	1	Linha automática de resultado Notus para vínculo/IFC	1	0
