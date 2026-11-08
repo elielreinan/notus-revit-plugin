@@ -53,8 +53,8 @@ copy /Y "%PLUGIN_OUT%\NotusRevitPlugin.dll" "%DIST%\manual_install\NotusRevitPlu
 copy /Y "%ROOT%NotusRevitPlugin\instalar_plugin_revit2025.bat" "%DIST%\manual_install\instalar_plugin_revit2025.bat" >nul
 copy /Y "%ROOT%shared_parameters\Notus_SharedParameters.txt" "%DIST%\manual_install\Notus_SharedParameters.txt" >nul
 xcopy /E /I /Y "%ROOT%NotusRevitPlugin\Assets" "%DIST%\manual_install\Assets" >nul
-copy /Y "%ROOT%README_FINAL.txt" "%DIST%\README_FINAL.txt" >nul
-copy /Y "%ROOT%README_FINAL.txt" "%DIST%\manual_install\README_FINAL.txt" >nul
+copy /Y "%ROOT%MANUAL.md" "%DIST%\MANUAL.md" >nul
+copy /Y "%ROOT%MANUAL.md" "%DIST%\manual_install\MANUAL.md" >nul
 copy /Y "%ROOT%notus_logo.ico" "%DIST%\notus_logo.ico" >nul
 
 (
@@ -82,5 +82,4 @@ echo %DIST%\manual_install
 echo =====================================================
 echo.
 endlocal
-
 

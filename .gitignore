@@ -1,0 +1,15 @@
+.vs/
+**/bin/
+**/obj/
+
+*.user
+*.suo
+*.cache
+*.log
+
+.env
+.env.*
+*.pfx
+*.p12
+*.key
+*.pem

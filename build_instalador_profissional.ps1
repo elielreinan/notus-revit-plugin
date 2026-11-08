@@ -32,8 +32,8 @@ Copy-Item (Join-Path $PluginOut "NotusRevitPlugin.dll") (Join-Path $Manual "Notu
 Copy-Item (Join-Path $Root "NotusRevitPlugin\instalar_plugin_revit2025.bat") (Join-Path $Manual "instalar_plugin_revit2025.bat") -Force
 Copy-Item (Join-Path $Root "shared_parameters\Notus_SharedParameters.txt") (Join-Path $Manual "Notus_SharedParameters.txt") -Force
 Copy-Item (Join-Path $Root "NotusRevitPlugin\Assets") (Join-Path $Manual "Assets") -Recurse -Force
-Copy-Item (Join-Path $Root "README_FINAL.txt") (Join-Path $Output "README_FINAL.txt") -Force
-Copy-Item (Join-Path $Root "README_FINAL.txt") (Join-Path $Manual "README_FINAL.txt") -Force
+Copy-Item (Join-Path $Root "MANUAL.md") (Join-Path $Output "MANUAL.md") -Force
+Copy-Item (Join-Path $Root "MANUAL.md") (Join-Path $Manual "MANUAL.md") -Force
 Copy-Item (Join-Path $Root "notus_logo.ico") (Join-Path $Output "notus_logo.ico") -Force
 Copy-Item (Join-Path $Root "CHANGELOG.md") (Join-Path $Output "CHANGELOG.md") -Force
 if (Test-Path (Join-Path $Root "materiais_comerciais")) {
@@ -60,5 +60,4 @@ Write-Host "Concluido. Arquivos finais em:" -ForegroundColor Green
 Write-Host $Output
 Write-Host "Instalador: $Installer" -ForegroundColor Green
 Write-Host ""
-
 
